@@ -7,7 +7,8 @@ import {
   usersCollection,
   exercisesCollection,
   userWorkoutsCollection,
-  loggedWorkoutsCollection
+  completedWorkoutsCollection,
+  completedExercisesCollection
 } from '../firebase'
 import { 
   createUserWithEmailAndPassword,
@@ -39,12 +40,20 @@ export default createStore({
       state.userWorkouts = val
     },
 
-    setLoggedWorkouts(state, val) {
-      state.loggedWorkouts = val
+    setCompletedWorkouts(state, val) {
+      state.completedWorkouts = val
     },
 
-    setLoggedExercises(state, val) {
-      state.loggedExercises = val
+    setCompletedExercises(state, val) {
+      state.completedExercises = val
+    },
+
+    setCurrentWorkout(state, val) {
+      state.completedWorkout = val
+    },
+
+    setWorkoutExercises(state, val) {
+      state.workoutExercises = val
     },
 
     setUserProfile(state, val) {
@@ -59,7 +68,7 @@ export default createStore({
 
     // async getLoggedExercises ({ commit }) {
 
-    //   const q = query(collection(db, loggedWorkoutsCollection), where("userId", "==", auth.currentUser.uid));
+    //   const q = query(collection(db, completedWorkoutsCollection), where("userId", "==", auth.currentUser.uid));
 
     //   const querySnapshot = await getDocs(q);
     //   let workoutsArray = [];
@@ -82,9 +91,82 @@ export default createStore({
     //   commit('setLoggedExercises', exercisesArray);
     // },
 
-    async getLoggedWorkouts ({ commit }) {
+    async getWorkoutExercises ({ commit }, completedWorkoutId) {
 
-      const q = query(collection(db, loggedWorkoutsCollection), where("userId", "==", auth.currentUser.uid));
+      const q = query(collection(db, completedExercisesCollection), where("userId", "==", auth.currentUser.uid), where("completedWorkoutId", "==", completedWorkoutId));
+
+      const querySnapshot = await getDocs(q);
+      let exercisesArray = [];
+      querySnapshot.forEach((doc) => {
+        let exercise = doc.data();
+        exercise.id = doc.id;
+        exercise.createdDate = exercise.created.toDate();
+        exercisesArray.push(exercise);
+      });
+
+      console.log(exercisesArray);
+
+      commit('setWorkoutExercises', exercisesArray);
+    },
+
+
+    async saveCompletedExercise ({ state }, details) {
+
+      console.log(details);
+
+      // save set in completedExercises
+      const docRef = await addDoc(collection(db, completedExercisesCollection), {
+        userId: state.user.uid,
+        completedWorkoutId: details.completedWorkoutId,
+        exerciseId: details.exerciseId,
+        created: Timestamp.now(),
+        exerciseIndex: details.exerciseIndex,
+        setIndex: details.setIndex,
+        weight: details.weight,
+        reps: details.reps
+      });
+      console.log("Document written with ID: ", docRef.id);
+
+      return state
+  
+    },
+
+
+    async createCompletedWorkout ({ state, commit }, workout) {
+
+      const docRef = await addDoc(collection(db, completedWorkoutsCollection), {
+        userId: state.user.uid,
+        workoutId: workout.workoutId,
+        name: workout.name,
+        created: Timestamp.now()
+      });
+      console.log("Document written with ID: ", docRef.id);
+
+      commit('setCurrentWorkout', docRef);
+  
+    },
+
+    async getCompletedExercises ({ commit }) {
+
+      const q = query(collection(db, completedExercisesCollection), where("userId", "==", auth.currentUser.uid));
+
+      const querySnapshot = await getDocs(q);
+      let exercisesArray = [];
+      querySnapshot.forEach((doc) => {
+        let exercise = doc.data();
+        exercise.id = doc.id;
+        exercise.createdDate = exercise.created.toDate();
+        exercisesArray.push(exercise);
+      });
+
+      console.log(exercisesArray);
+
+      commit('setCompletedExercises', exercisesArray);
+    },
+
+    async getCompletedWorkouts ({ commit }) {
+
+      const q = query(collection(db, completedWorkoutsCollection), where("userId", "==", auth.currentUser.uid));
 
       const querySnapshot = await getDocs(q);
       let workoutsArray = [];
@@ -97,23 +179,23 @@ export default createStore({
 
       console.log(workoutsArray);
 
-      commit('setLoggedWorkouts', workoutsArray);
+      commit('setCompletedWorkouts', workoutsArray);
 
-      let exercisesArray = [];
-      workoutsArray.forEach(workout => {
-        workout.exercises.forEach(exercise => {
-          exercisesArray.push(exercise);
-        });
-      });
+      // let exercisesArray = [];
+      // workoutsArray.forEach(workout => {
+      //   workout.exercises.forEach(exercise => {
+      //     exercisesArray.push(exercise);
+      //   });
+      // });
 
-      console.log(exercisesArray);
+      // console.log(exercisesArray);
 
-      commit('setLoggedExercises', exercisesArray);
+      // commit('setLoggedExercises', exercisesArray);
     },
 
     async logWorkout ({ state }, details) {
 
-      const docRef = await addDoc(collection(db, loggedWorkoutsCollection), {
+      const docRef = await addDoc(collection(db, completedWorkoutsCollection), {
         userId: state.user.uid,
         workoutId: details.workoutId,
         name: details.name,

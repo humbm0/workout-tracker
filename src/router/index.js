@@ -29,9 +29,9 @@ const routes = [
     }
   },
   {
-    path: '/logged-workouts',
-    name: 'LoggedWorkouts',
-    component: () => import('../views/LoggedWorkouts.vue'),
+    path: '/completed-workouts',
+    name: 'CompletedWorkouts',
+    component: () => import('../views/completedWorkouts.vue'),
     meta: {
       requiresAuth: true
     }

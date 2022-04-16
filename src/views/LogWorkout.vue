@@ -2,8 +2,8 @@
   <div>
 
     <div class="active-workout" v-if="!workoutComplete">
-      <h1>{{workout.name}}</h1>
-      <p>Exercises: {{workout.exercises.length}}</p>
+      <h1 v-if="workout">{{workout.name}}</h1>
+      <p v-if="workout.exercises">Exercises: {{workout.exercises.length}}</p>
 
       <div v-for="(workoutExercise, i) in workout.exercises" :key="i" v-show="i==exerciseIndex" class="exercise-card">
         <h3>{{i+1}}.{{workoutExercise.name}}</h3>
@@ -18,7 +18,7 @@
             type="number" 
             placeholder="Reps"
             v-model="currentSet.reps" />
-          <button @click="logSet(workoutExercise)">Log set</button>
+          <button @click="saveSet(workoutExercise)">Log set</button>
         </form>
       </div>
     </div>
@@ -57,38 +57,65 @@ export default {
     }; 
   },
   computed: {
-    ...mapState(['userProfile', 'exercises', 'userWorkouts', 'workout']),
+    ...mapState(['userProfile', 'exercises', 'userWorkouts', 'workout', 'completedWorkout']),
   },
   created(){
     this.$store.dispatch('getWorkout', { id: this.$route.params.workoutId })
   },
   methods: {
-    logSet(exercise){
-      const set = {
-        exerciseId: exercise.exerciseId,
-        name: exercise.name,
-        weight: this.currentSet.weight,
-        reps: this.currentSet.reps,
-      }
+    saveSet(exercise){
+      console.log(exercise);
 
-			this.currentWorkout.exercises.push(set);
+      // save set to completed exercises database
+      this.$store.dispatch('saveCompletedExercise', {
+          completedWorkoutId: this.completedWorkout.id,
+          exerciseId: exercise.exerciseId,
+          exerciseIndex: this.exerciseIndex,
+          setIndex: this.setIndex,
+          weight: this.currentSet.weight,
+          reps: this.currentSet.reps,
+      })
 
       if (this.exerciseIndex == this.workout.exercises.length - 1 && this.setIndex == exercise.sets - 1) {
-        console.log(this.setIndex);
-        console.log("workout complete!");
-        this.$store.dispatch('logWorkout', {
-          workoutId: this.workout.id,
-          name: this.workout.name,
-          exercises: this.currentWorkout.exercises
-        })
+        // workout complete
         this.workoutComplete = true;
+        this.$store.dispatch('getWorkoutExercises', this.completedWorkout.id)
       } else if (this.setIndex < exercise.sets - 1) {
+        // move to next set
         this.setIndex ++; 
       } else {
+        // sets complete move to next workout
         this.exerciseIndex ++;
         this.setIndex = 0;
       }
-    }
+
+    },
+    // logSet(exercise){
+    //   const set = {
+    //     exerciseId: exercise.exerciseId,
+    //     name: exercise.name,
+    //     weight: this.currentSet.weight,
+    //     reps: this.currentSet.reps,
+    //   }
+
+		// 	this.currentWorkout.exercises.push(set);
+
+    //   if (this.exerciseIndex == this.workout.exercises.length - 1 && this.setIndex == exercise.sets - 1) {
+    //     console.log(this.setIndex);
+    //     console.log("workout complete!");
+    //     this.$store.dispatch('logWorkout', {
+    //       workoutId: this.workout.id,
+    //       name: this.workout.name,
+    //       exercises: this.currentWorkout.exercises
+    //     })
+    //     this.workoutComplete = true;
+    //   } else if (this.setIndex < exercise.sets - 1) {
+    //     this.setIndex ++; 
+    //   } else {
+    //     this.exerciseIndex ++;
+    //     this.setIndex = 0;
+    //   }
+    // }
   },  
 }
 </script>

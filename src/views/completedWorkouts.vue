@@ -1,12 +1,12 @@
 <template>
   <div>
 
-    <h1>Logged workouts</h1>
+    <h1>Completed workouts</h1>
 
     <div class="exercises-list">
       <ul>
-        <li v-for="(workout, i) in loggedWorkouts" :key="i">
-          <div class="exercise-card" @click="showWorkout = workout">
+        <li v-for="(workout, i) in completedWorkouts" :key="i">
+          <div class="exercise-card" @click="viewWorkout(workout)">
             <div class="content">
               <h3>{{workout.name}}</h3>
               <p>{{formatDate(workout.createdDate) }}</p>
@@ -22,7 +22,7 @@
         <p>{{formatDate(showWorkout.createdDate) }}</p>
         <div class="exercises-list">
           <ul>
-            <li v-for="(exercise, i) in showWorkout.exercises" :key="i">
+            <li v-for="(exercise, i) in workoutExercises" :key="i">
               <div class="exercise-card">
                 <div class="content">
                   <h3>{{exercise.name}}</h3>
@@ -47,7 +47,7 @@ import { mapState } from 'vuex'
 import moment from 'moment'
 
 export default {
-  name: 'LoggedWorkouts',
+  name: 'CompleteWorkouts',
   components: {
     
   },
@@ -57,15 +57,20 @@ export default {
     }; 
   },
   computed: {
-    ...mapState(['userProfile', 'loggedWorkouts']),
+    ...mapState(['userProfile', 'completedWorkouts', 'workoutExercises']),
   },
   mounted(){
-    this.$store.dispatch('getLoggedWorkouts');
+    this.$store.dispatch('getCompletedWorkouts');
   },
   methods: {
     formatDate(value) {
       return moment(value).format("MMM Do YY"); 
     },
+    viewWorkout(workout){
+      this.showWorkout = workout;
+      console.log(workout);
+      this.$store.dispatch('getWorkoutExercises', workout.id);
+    }
   },  
 }
 </script>

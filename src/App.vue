@@ -3,7 +3,7 @@
     <router-link to="/">Home</router-link> |
     <router-link to="/exercises">Exercises</router-link>
     <router-link to="/workouts">Workouts</router-link>
-    <router-link to="/logged-workouts">Logged workouts</router-link>
+    <router-link to="/completed-workouts">Completed workouts</router-link>
     <button @click="$store.dispatch('logout')">Logout</button>
   </div>
   <router-view/>

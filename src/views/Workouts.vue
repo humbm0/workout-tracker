@@ -117,6 +117,12 @@ export default {
         return moment(value).format("MMM Do YY"); 
     },
     startWorkout(workout){
+      console.log(workout);
+      // create initial instance if completed workout
+      this.$store.dispatch('createCompletedWorkout', {
+          workoutId: workout.id,
+          name: workout.name
+      })
       this.$router.push({name:'LogWorkout',params:{workoutId:workout.id}});
     },
     addExercise() {

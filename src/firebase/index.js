@@ -29,7 +29,8 @@ const db = getFirestore()
 const usersCollection = "users";
 const exercisesCollection = "exercises";
 const userWorkoutsCollection = "userWorkouts";
-const loggedWorkoutsCollection = "loggedWorkouts";
+const completedWorkoutsCollection = "completedWorkouts";
+const completedExercisesCollection = "completedExercises";
 
 export { 
   db,
@@ -37,6 +38,7 @@ export {
   usersCollection,
   exercisesCollection,
   userWorkoutsCollection,
-  loggedWorkoutsCollection
+  completedWorkoutsCollection,
+  completedExercisesCollection
 }
 /*eslint-enable */
