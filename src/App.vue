@@ -1,6 +1,6 @@
 <template>
   <div id="nav" v-if="userProfile">
-    <router-link to="/">Home</router-link> |
+    <router-link to="/">Home</router-link>
     <router-link to="/exercises">Exercises</router-link>
     <router-link to="/workouts">Workouts</router-link>
     <router-link to="/completed-workouts">Completed workouts</router-link>
@@ -26,9 +26,9 @@ export default {
   },
   computed: {
     ...mapState(['userProfile']),
-    // showNav() {
-    //   return Object.keys(this.userProfile).length > 0
-    // }
+  },
+  methods: {
+
   }
 }
 </script>
@@ -46,6 +46,8 @@ body{
   max-width: 900px;
   margin: auto;
   box-sizing: border-box;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 ul{
   padding: 0;
@@ -81,6 +83,7 @@ button{
   align-items: center;
   box-sizing: border-box;
   border-radius: .5rem;
+  justify-content: space-between;
   img{
     width: 150px;
     height: 150px;

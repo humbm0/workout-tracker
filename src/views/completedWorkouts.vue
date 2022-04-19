@@ -6,11 +6,15 @@
     <div class="exercises-list">
       <ul>
         <li v-for="(workout, i) in completedWorkouts" :key="i">
-          <div class="exercise-card" @click="viewWorkout(workout)">
+          <div class="exercise-card">
             <div class="content">
               <h3>{{workout.name}}</h3>
               <p>{{formatDate(workout.createdDate) }}</p>
-            </div>           
+            </div>
+            <div>
+              <button @click="viewWorkout(workout)">View</button>   
+              <button @click="deleteWorkout(workout)">Delete</button>  
+            </div>    
           </div>
         </li>
       </ul>
@@ -22,11 +26,11 @@
         <p>{{formatDate(showWorkout.createdDate) }}</p>
         <div class="exercises-list">
           <ul>
-            <li v-for="(exercise, i) in workoutExercises" :key="i">
+            <li v-for="(exercise, i) in sortedExercises" :key="i">
               <div class="exercise-card">
                 <div class="content">
                   <h3>{{exercise.name}}</h3>
-                  <p>{{exercise.description}}</p>
+                  <p>Set: {{exercise.setIndex + 1}}</p>
                   <p>Weight: {{exercise.weight}}kg | Reps: {{exercise.reps}}</p>
                 </div>
               </div>
@@ -57,7 +61,11 @@ export default {
     }; 
   },
   computed: {
-    ...mapState(['userProfile', 'completedWorkouts', 'workoutExercises']),
+    sortedExercises() {
+      const exercises = this.workoutExercises;
+      return exercises.sort((a, b) => a.exerciseIndex - b.exerciseIndex || a.setIndex - b.setIndex );
+    },
+    ...mapState(['userProfile', 'completedWorkouts', 'workoutExercises'])
   },
   mounted(){
     this.$store.dispatch('getCompletedWorkouts');
@@ -68,9 +76,11 @@ export default {
     },
     viewWorkout(workout){
       this.showWorkout = workout;
-      console.log(workout);
       this.$store.dispatch('getWorkoutExercises', workout.id);
-    }
+    },
+    deleteWorkout(workout){
+      this.$store.dispatch('deleteCompletedWorkout', workout.id);
+    },
   },  
 }
 </script>

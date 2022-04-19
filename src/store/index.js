@@ -1,6 +1,6 @@
 import { createStore } from 'vuex'
 import router from '../router'
-import { collection, addDoc, setDoc, getDoc, getDocs, doc, query, where, Timestamp} from "firebase/firestore"
+import { collection, addDoc, setDoc, getDoc, deleteDoc, getDocs, doc, query, where, Timestamp} from "firebase/firestore"
 import { 
   auth,
   db,
@@ -91,6 +91,30 @@ export default createStore({
     //   commit('setLoggedExercises', exercisesArray);
     // },
 
+    async deleteCompletedExercise ({dispatch }, id) {
+      console.log(id);
+      // delete workout
+      await deleteDoc(doc(db, completedExercisesCollection, id));
+      // get updated list
+      dispatch('getCompletedExercises')
+    },
+
+    async deleteWorkout ({dispatch }, id) {
+      console.log(id);
+      // delete workout
+      await deleteDoc(doc(db, userWorkoutsCollection, id));
+      // get updated list
+      dispatch('getCompletedWorkouts')
+    },
+
+    async deleteCompletedWorkout ({dispatch }, id) {
+      console.log(id);
+      // delete workout
+      await deleteDoc(doc(db, completedWorkoutsCollection, id));
+      // get updated list
+      dispatch('getCompletedWorkouts')
+    },
+
     async getWorkoutExercises ({ commit }, completedWorkoutId) {
 
       const q = query(collection(db, completedExercisesCollection), where("userId", "==", auth.currentUser.uid), where("completedWorkoutId", "==", completedWorkoutId));
@@ -103,8 +127,6 @@ export default createStore({
         exercise.createdDate = exercise.created.toDate();
         exercisesArray.push(exercise);
       });
-
-      console.log(exercisesArray);
 
       commit('setWorkoutExercises', exercisesArray);
     },
@@ -119,6 +141,7 @@ export default createStore({
         userId: state.user.uid,
         completedWorkoutId: details.completedWorkoutId,
         exerciseId: details.exerciseId,
+        name: details.name,
         created: Timestamp.now(),
         exerciseIndex: details.exerciseIndex,
         setIndex: details.setIndex,

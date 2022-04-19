@@ -70,6 +70,7 @@ export default {
       this.$store.dispatch('saveCompletedExercise', {
           completedWorkoutId: this.completedWorkout.id,
           exerciseId: exercise.exerciseId,
+          name: exercise.name,
           exerciseIndex: this.exerciseIndex,
           setIndex: this.setIndex,
           weight: this.currentSet.weight,

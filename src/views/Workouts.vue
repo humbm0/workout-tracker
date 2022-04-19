@@ -12,8 +12,11 @@
               <p>{{workout.exercises.length}} exercises</p>
               <p>{{formatDate(workout.createdDate)}}</p>
             </div>
-            <button>View</button>
-            <button @click="startWorkout(workout)">Start workout</button>
+            <div>
+              <button>View</button>
+              <button @click="startWorkout(workout)">Start workout</button>
+              <button @click="deleteWorkout(workout)">Delete</button>
+            </div>
           </div>
         </li>
       </ul>
@@ -146,6 +149,9 @@ export default {
 
       this.workout.name = '';
 			this.workout.exercises = [];
+    },
+    deleteWorkout(workout){
+      this.$store.dispatch('deleteWorkout', workout.id);
     },
   },  
 }
