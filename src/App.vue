@@ -67,6 +67,7 @@ ul{
 }
 button{
   height: fit-content;
+  margin: .25rem;
 }
 .exercises-list{
   li{
@@ -89,5 +90,27 @@ button{
     height: 150px;
     margin-right: 1.5rem;
   }
+}
+.overlay{
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  background: rgba($color: #000000, $alpha: 0.4);
+  display: flex;
+  z-index: 99;
+  left: 0;
+  top: 0;
+  justify-content: center;
+  align-items: center;
+}
+.workout-card{
+  width: 40rem;
+  background: #fff;
+  max-height: 80vh;
+  overflow-y: scroll;
+  border-radius: 1rem;
+  text-align: left;
+  padding: 2rem;
+  z-index: 100;
 }
 </style>

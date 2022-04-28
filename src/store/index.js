@@ -182,8 +182,6 @@ export default createStore({
         exercisesArray.push(exercise);
       });
 
-      console.log(exercisesArray);
-
       commit('setCompletedExercises', exercisesArray);
     },
 
@@ -199,8 +197,6 @@ export default createStore({
         workout.createdDate = workout.created.toDate();
         workoutsArray.push(workout);
       });
-
-      console.log(workoutsArray);
 
       commit('setCompletedWorkouts', workoutsArray);
 

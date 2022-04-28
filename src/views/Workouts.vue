@@ -13,7 +13,7 @@
               <p>{{formatDate(workout.createdDate)}}</p>
             </div>
             <div>
-              <button>View</button>
+              <button @click="viewWorkout(workout)">View</button>
               <button @click="startWorkout(workout)">Start workout</button>
               <button @click="deleteWorkout(workout)">Delete</button>
             </div>
@@ -41,6 +41,28 @@
           </div>
         </li>
       </ul>
+    </div>
+
+    <div v-if="showWorkout" class="overlay" @click="showWorkout = false">
+      <div class="workout-card">
+        <h2>{{showWorkout.name}}</h2>
+        <p>{{formatDate(showWorkout.createdDate) }}</p>
+        <div class="exercises-list">
+          <ul>
+            <li v-for="(exercise, i) in showWorkout.exercises" :key="i">
+              <div class="exercise-card">
+                <div class="content">
+                  <h3>{{exercise.name}}</h3>
+                  <p>Sets: {{exercise.sets}}</p>
+                  <p>Reps: {{exercise.minReps}} - {{exercise.maxReps}}</p>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <button @click="startWorkout(showWorkout)">Start workout</button>
+        <button @click="deleteWorkout(showWorkout)">Delete</button>
+      </div>
     </div>
       
     <button @click="addExerciseForm = true">Add exercise</button>
@@ -105,7 +127,8 @@ export default {
       workout: {
         name: '',
         exercises: [],
-      }
+      },
+      showWorkout: false,
     }; 
   },
   computed: {
@@ -118,6 +141,10 @@ export default {
   methods: {
     formatDate(value) {
         return moment(value).format("MMM Do YY"); 
+    },
+    viewWorkout(workout){
+      console.log(workout);
+      this.showWorkout = workout;
     },
     startWorkout(workout){
       console.log(workout);
