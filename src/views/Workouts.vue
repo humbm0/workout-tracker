@@ -146,14 +146,14 @@ export default {
       console.log(workout);
       this.showWorkout = workout;
     },
-    startWorkout(workout){
+    async startWorkout(workout){
       console.log(workout);
       // create initial instance if completed workout
       this.$store.dispatch('createCompletedWorkout', {
           workoutId: workout.id,
           name: workout.name
       })
-      this.$router.push({name:'LogWorkout',params:{workoutId:workout.id}});
+      // this.$router.push({name:'LogWorkout',params:{workoutId:workout.id, completedWorkoutId:this.completedWorkoutId}});
     },
     addExercise() {
       const workoutExercise = {

@@ -1,31 +1,45 @@
 <template>
   <div>
 
-    <div class="active-workout" v-if="!workoutComplete">
-      <h1 v-if="workout">{{workout.name}}</h1>
-      <p v-if="workout.exercises">Exercises: {{workout.exercises.length}}</p>
+    <div class="active-workout" v-if="!workoutComplete && workout">
+      <h1>{{workout.name}}</h1>
+      <p>Exercises: {{workout.exercises.length}}</p>
 
-      <div v-for="(workoutExercise, i) in workout.exercises" :key="i" v-show="i==exerciseIndex" class="exercise-card">
-        <h3>{{i+1}}.{{workoutExercise.name}}</h3>
-        <p>Sets: {{workoutExercise.sets}} | Rest: {{workoutExercise.rest}}secs</p>
-        <form @submit.prevent v-for="(set, i) in workoutExercise.sets" :key="i" v-show="i==setIndex">
-          <h4>Set {{i+1}}</h4>
+      <div v-for="(workoutExercise, exerciseIndex) in workout.exercises" :key="exerciseIndex" class="exercise-card log-exercise-card">
+        <h3>{{exerciseIndex+1}}.{{workoutExercise.name}}</h3>
+        <p>Sets: {{workoutExercise.sets}} | Reps: {{workoutExercise.minReps}}-{{workoutExercise.maxReps}} | Rest: {{workoutExercise.rest}}secs</p>
+        <form @submit.prevent v-for="(set, setIndex) in workoutExercise.sets" :key="setIndex" >
+          <p>Set {{setIndex+1}}</p>
           <input 
             type="number" 
             placeholder="Weight"
-            v-model="currentSet.weight" />
+            v-model="sets.weight[workoutExercise.exerciseId + setIndex]" />
           <input 
             type="number" 
             placeholder="Reps"
-            v-model="currentSet.reps" />
-          <button @click="saveSet(workoutExercise)">Log set</button>
+            v-model="sets.reps[workoutExercise.exerciseId + setIndex]" />
+          <button v-if="!sets.status[workoutExercise.exerciseId + setIndex] || sets.status[workoutExercise.exerciseId + setIndex] == 'empty'" @click="saveSet(workoutExercise, exerciseIndex, setIndex)">Save</button>
+          <button v-if="sets.status[workoutExercise.exerciseId + setIndex] == 'completed'" @click="editSet(workoutExercise, exerciseIndex, setIndex)">Edit</button>
         </form>
       </div>
+      <button @click="finishWorkout">Finish</button>
     </div>
 
     <div class="complete-workout" v-if="workoutComplete">
       <h1>Well done! Workout complete!</h1>
-      
+      <div class="exercises-list">
+          <ul>
+            <li v-for="(exercise, i) in completedWorkoutExercises" :key="i">
+              <div class="exercise-card">
+                <div class="content">
+                  <h3>{{exercise.name}}</h3>
+                  <p>Set: {{exercise.setIndex + 1}}</p>
+                  <p>Weight: {{exercise.weight}}kg | Reps: {{exercise.reps}}</p>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
     </div>
 
   </div>
@@ -44,8 +58,6 @@ export default {
   },
   data() { 
     return {
-      exerciseIndex: 0,
-      setIndex: 0,
       currentWorkout: {
         exercises: [],
       },
@@ -53,70 +65,56 @@ export default {
         weight: '',
         reps: '',
       },
+      sets: {
+        weight: {},
+        reps: {},
+        status:{}
+      },
+      completedExercises: [],
       workoutComplete: false,
     }; 
   },
   computed: {
-    ...mapState(['userProfile', 'exercises', 'userWorkouts', 'workout', 'completedWorkout']),
+    ...mapState(['userProfile', 'exercises', 'userWorkouts', 'workout', 'completedWorkoutExercises']),
   },
-  created(){
-    this.$store.dispatch('getWorkout', { id: this.$route.params.workoutId })
+  async mounted(){
+    this.$store.dispatch('getWorkout', { id: this.$route.params.workoutId });
+    await this.$store.dispatch('getCompletedWorkoutExercises', this.$route.params.completedWorkoutId);
+    this.mapCompletedExercises(); 
   },
   methods: {
-    saveSet(exercise){
-      console.log(exercise);
+    mapCompletedExercises(){
+      console.log(this.completedWorkoutExercises);
+    },
+    editSet(exercise, setIndex){
+      this.sets.status[exercise.exerciseId + setIndex] = "empty";
+      console.log(this.sets.status);
+    },
+    saveSet(exercise, exerciseIndex, setIndex){
+      const set = {
+        completedWorkoutId: this.$route.params.completedWorkoutId ,
+        exerciseId: exercise.exerciseId,
+        name: exercise.name,
+        exerciseIndex: exerciseIndex,
+        setIndex: setIndex,
+        weight: this.sets.weight[exercise.exerciseId + setIndex],
+        reps: this.sets.reps[exercise.exerciseId + setIndex],
+      }
+      console.log(set);
 
       // save set to completed exercises database
-      this.$store.dispatch('saveCompletedExercise', {
-          completedWorkoutId: this.completedWorkout.id,
-          exerciseId: exercise.exerciseId,
-          name: exercise.name,
-          exerciseIndex: this.exerciseIndex,
-          setIndex: this.setIndex,
-          weight: this.currentSet.weight,
-          reps: this.currentSet.reps,
-      })
+      // this.$store.dispatch('saveSet', set)
 
-      if (this.exerciseIndex == this.workout.exercises.length - 1 && this.setIndex == exercise.sets - 1) {
-        // workout complete
-        this.workoutComplete = true;
-        this.$store.dispatch('getWorkoutExercises', this.completedWorkout.id)
-      } else if (this.setIndex < exercise.sets - 1) {
-        // move to next set
-        this.setIndex ++; 
-      } else {
-        // sets complete move to next workout
-        this.exerciseIndex ++;
-        this.setIndex = 0;
-      }
+      this.sets.status[exercise.exerciseId + setIndex] = "completed";
 
+      this.completedExercises.push(set);
+      console.log(this.completedExercises);
     },
-    // logSet(exercise){
-    //   const set = {
-    //     exerciseId: exercise.exerciseId,
-    //     name: exercise.name,
-    //     weight: this.currentSet.weight,
-    //     reps: this.currentSet.reps,
-    //   }
-
-		// 	this.currentWorkout.exercises.push(set);
-
-    //   if (this.exerciseIndex == this.workout.exercises.length - 1 && this.setIndex == exercise.sets - 1) {
-    //     console.log(this.setIndex);
-    //     console.log("workout complete!");
-    //     this.$store.dispatch('logWorkout', {
-    //       workoutId: this.workout.id,
-    //       name: this.workout.name,
-    //       exercises: this.currentWorkout.exercises
-    //     })
-    //     this.workoutComplete = true;
-    //   } else if (this.setIndex < exercise.sets - 1) {
-    //     this.setIndex ++; 
-    //   } else {
-    //     this.exerciseIndex ++;
-    //     this.setIndex = 0;
-    //   }
-    // }
+    finishWorkout(){
+      // this.workoutComplete = true;
+      console.log(this.sets);
+      this.$store.dispatch('getCompletedWorkoutExercises', this.$route.params.completedWorkoutId)
+    }
   },  
 }
 </script>

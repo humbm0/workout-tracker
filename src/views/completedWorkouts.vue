@@ -1,7 +1,7 @@
 <template>
   <div>
 
-    <h1>Completed workouts</h1>
+    <h1>History</h1>
 
     <div class="exercises-list">
       <ul>
@@ -62,10 +62,10 @@ export default {
   },
   computed: {
     sortedExercises() {
-      const exercises = this.workoutExercises;
+      const exercises = this.completedWorkoutExercises;
       return exercises.sort((a, b) => a.exerciseIndex - b.exerciseIndex || a.setIndex - b.setIndex );
     },
-    ...mapState(['userProfile', 'completedWorkouts', 'workoutExercises'])
+    ...mapState(['userProfile', 'completedWorkouts', 'completedWorkoutExercises'])
   },
   mounted(){
     this.$store.dispatch('getCompletedWorkouts');
@@ -76,7 +76,7 @@ export default {
     },
     viewWorkout(workout){
       this.showWorkout = workout;
-      this.$store.dispatch('getWorkoutExercises', workout.id);
+      this.$store.dispatch('getCompletedWorkoutExercises', workout.id);
     },
     deleteWorkout(workout){
       this.$store.dispatch('deleteCompletedWorkout', workout.id);

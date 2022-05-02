@@ -37,7 +37,7 @@ const routes = [
     }
   },
   {
-    path: '/log-workout/:workoutId',
+    path: '/log-workout/:workoutId/:completedWorkoutId',
     name: 'LogWorkout',
     component: () => import('../views/LogWorkout.vue'),
     meta: {

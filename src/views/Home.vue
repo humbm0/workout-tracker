@@ -1,7 +1,7 @@
 <template>
   <div> 
 
-    <h1 v-if="userProfile">Welcome back {{userProfile.firstName}}</h1>
+    <h1 v-if="userProfile">{{userProfile.firstName}}'s dashboard</h1>
     <div v-if="completedWorkouts">
       <h4>Completed workouts</h4>
       <h1>{{completedWorkouts.length}}</h1>
@@ -18,12 +18,13 @@
                 <h3>{{exercises[0].name}}</h3>
                 <p>Sets: {{exercises.length}}</p>
                 <div v-for="(set, i) in sortByWeight(exercises)" :key="i">
-                  <span>Best weight: {{set.weight}}</span> | <span> Reps: {{set.reps}}</span>
+                  <div v-if="i === 0">
+                     <span>Best weight: {{set.weight}}</span> | <span> Reps: {{set.reps}}</span>
+                  </div>
                 </div>
               </div>
               <div>
-                <button @click="viewSets(exercise)">View sets</button>
-                <button @click="deleteExercise(exercise)">Delete</button>
+                <button @click="viewSets(exercises)">View sets</button>
               </div>
             </div>
           </li>
@@ -31,18 +32,18 @@
       </div>
     </div>
 
-     <div v-if="showExercise" class="overlay" @click="showExercise = false">
+     <div v-if="showSets" class="overlay" @click="showSets = false">
       <div class="workout-card">
-        <h2>{{showExercise[0].name}}</h2>
+        <h2>{{showSets[0].name}}</h2>
         <div class="exercises-list">
           <ul>
-            <li v-for="(exercise, i) in orderExerciseByWeight" :key="i">
+            <li v-for="(set, i) in showSets" :key="i">
               <div class="exercise-card">
                 <div class="content">
-                  <p>Weight: {{exercise.weight}}</p>
-                  <p>Reps: {{exercise.reps}}</p>
-                  <p>Date: {{formatDate(exercise.createdDate) }}</p>
-                  <p>Set: {{exercise.setIndex + 1}}</p>
+                  <p>Weight: {{set.weight}}</p>
+                  <p>Reps: {{set.reps}}</p>
+                  <p>Date: {{formatDate(set.createdDate) }}</p>
+                  <p>Set: {{set.setIndex + 1}}</p>
                 </div>
               </div>
             </li>
@@ -69,7 +70,7 @@ export default {
   },
   data() { 
     return { 
-      showExercise: null,
+      showSets: null,
     }; 
   },
   computed: {
@@ -107,17 +108,14 @@ export default {
       sets.sort( ( a, b) => {
           return b.weight - a.weight;
       });
-
-      console.log(sets);
-
       return sets;
     },
     formatDate(value) {
         return moment(value).format("MMM Do YY"); 
     },
-    viewSets(exercise){
-      console.log(exercise);
-      this.showExercise = exercise;
+    viewSets(exercises){
+      console.log(exercises);
+      this.showSets = exercises;
     },
     deleteExercise(exercise){
       this.$store.dispatch('deleteCompletedExercise', exercise.id);
@@ -125,3 +123,6 @@ export default {
   },  
 }
 </script>
+<style lang="scss">
+
+</style>

@@ -52,8 +52,8 @@ export default createStore({
       state.completedWorkout = val
     },
 
-    setWorkoutExercises(state, val) {
-      state.workoutExercises = val
+    setCompletedWorkoutExercises(state, val) {
+      state.completedWorkoutExercises = val
     },
 
     setUserProfile(state, val) {
@@ -66,31 +66,7 @@ export default createStore({
   },
   actions: {
 
-    // async getLoggedExercises ({ commit }) {
-
-    //   const q = query(collection(db, completedWorkoutsCollection), where("userId", "==", auth.currentUser.uid));
-
-    //   const querySnapshot = await getDocs(q);
-    //   let workoutsArray = [];
-    //   querySnapshot.forEach((doc) => {
-    //     let workout = doc.data();
-    //     workout.id = doc.id;
-    //     workout.createdDate = workout.created.toDate();
-    //     workoutsArray.push(workout);
-    //   });
-
-    //   console.log(workoutsArray);
-      
-    //   let exercisesArray = [];
-    //   workoutsArray.forEach(workout => {
-    //     workout.exercises.forEach(exercise => {
-    //       exercisesArray.push(exercise);
-    //     });
-    //   });
-
-    //   commit('setLoggedExercises', exercisesArray);
-    // },
-
+    // delete a completed exercise
     async deleteCompletedExercise ({dispatch }, id) {
       console.log(id);
       // delete workout
@@ -99,6 +75,7 @@ export default createStore({
       dispatch('getCompletedExercises')
     },
 
+    // delete a workout
     async deleteWorkout ({dispatch }, id) {
       console.log(id);
       // delete workout
@@ -107,6 +84,7 @@ export default createStore({
       dispatch('getCompletedWorkouts')
     },
 
+    // delete a completed workout
     async deleteCompletedWorkout ({dispatch }, id) {
       console.log(id);
       // delete workout
@@ -115,7 +93,10 @@ export default createStore({
       dispatch('getCompletedWorkouts')
     },
 
-    async getWorkoutExercises ({ commit }, completedWorkoutId) {
+    // get exercises completed in a workout
+    async getCompletedWorkoutExercises ({ commit }, completedWorkoutId) {
+
+      console.log(completedWorkoutId);
 
       const q = query(collection(db, completedExercisesCollection), where("userId", "==", auth.currentUser.uid), where("completedWorkoutId", "==", completedWorkoutId));
 
@@ -128,14 +109,16 @@ export default createStore({
         exercisesArray.push(exercise);
       });
 
-      commit('setWorkoutExercises', exercisesArray);
+      console.log(exercisesArray);
+
+      commit('setCompletedWorkoutExercises', exercisesArray);
     },
 
+    // save an exercise set to completed exercises db
+    async saveSet ({ state }, details) {
 
-    async saveCompletedExercise ({ state }, details) {
-
-      console.log(details);
-
+      // check if doc exists
+      
       // save set in completedExercises
       const docRef = await addDoc(collection(db, completedExercisesCollection), {
         userId: state.user.uid,
@@ -148,13 +131,13 @@ export default createStore({
         weight: details.weight,
         reps: details.reps
       });
-      console.log("Document written with ID: ", docRef.id);
+      console.log("Set saved: ", docRef.id);
 
       return state
   
     },
 
-
+    // save new workout to completed workout db
     async createCompletedWorkout ({ state, commit }, workout) {
 
       const docRef = await addDoc(collection(db, completedWorkoutsCollection), {
@@ -163,9 +146,11 @@ export default createStore({
         name: workout.name,
         created: Timestamp.now()
       });
-      console.log("Document written with ID: ", docRef.id);
+      console.log("Completed workout created: ", docRef.id);
 
       commit('setCurrentWorkout', docRef);
+
+      router.push({name:'LogWorkout',params:{workoutId:workout.workoutId, completedWorkoutId:docRef.id}})
   
     },
 
@@ -197,6 +182,8 @@ export default createStore({
         workout.createdDate = workout.created.toDate();
         workoutsArray.push(workout);
       });
+
+      console.log(workoutsArray);
 
       commit('setCompletedWorkouts', workoutsArray);
 
@@ -239,7 +226,7 @@ export default createStore({
         const workout = docSnap.data();
         workout.id = docSnap.id;
         workout.createdDate = workout.created.toDate();
-        console.log("Document data:", workout);
+        console.log("Workout:", workout);
         commit('setWorkout', workout);
       } else {
         // doc.data() will be undefined in this case
